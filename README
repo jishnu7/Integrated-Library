@@ -1,0 +1,13 @@
+Integrated Library
+
+This add-on is mainly aimed at saving stages of mesh creation and also saving 
+some pre defined objects.
+
+Usage:
+
+This functionality can be accessed via the "Tool Shelf" in 3D View ([T] key).
+
+Version history:
+
+v0.1 - Initial revision. Seems to work fine for most purposes.
+
