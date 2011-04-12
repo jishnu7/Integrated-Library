@@ -1,26 +1,26 @@
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
-#  This program is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 2
-#  of the License, or (at your option) any later version.
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software Foundation,
-#  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 # ##### END GPL LICENSE BLOCK #####
 
-bl_addon_info = {
+bl_info = {
     'name': 'Add Mesh: Integrated Library',
-    'author': 'Jishnu <jishnu7@gmail.com>',
-    'version': '0.1',
-    'blender': (2, 52, 5),
+    'author': 'Jishnu <jishnu7@gmail.com>, ivo <ivo@ivogrigull.com>',
+    'version': '0.2',
+    'blender': (2, 56, 6),
     'location': 'Properties > Object > Library Panel',
     'description': 'Integrated Library',
     'category': 'Add Mesh'}
@@ -28,8 +28,7 @@ bl_addon_info = {
 __bpydoc__ = """
 Integrated Library
 
-This add-on is mainly aimed at saving stages of mesh creation and also saving 
-some pre defined objects.
+This add-on will help to save stages of mesh creation an adding your meshes quickly.
 
 Usage:
 
@@ -38,8 +37,10 @@ This functionality can be accessed via the "Tool Shelf" in 3D View ([T] key).
 Version history:
 
 v0.1 - Initial revision. Seems to work fine for most purposes.
+v0.2 - Updated to work with the API changes. Thanks to ivo <ivo@ivogrigull.com> for the update.
 
-""""
+"""
+
 import bpy
 from bpy.props import *
 
@@ -164,7 +165,7 @@ def create_mesh_object(context, verts, edges, faces, name):
 
     # Link new object to the given scene and select it.
     scene.objects.link(ob_new)
-    ob_new.selected = True
+    ob_new.select = True
 
     # Place the object at the 3D cursor location.
     ob_new.location = context.scene.cursor_location
@@ -174,7 +175,7 @@ def create_mesh_object(context, verts, edges, faces, name):
         bpy.ops.object.mode_set(mode='OBJECT')
 
         # Select the active object as well.
-        obj_act.selected = True
+        obj_act.select = True
 
         # Apply location of new object.
         scene.update()
@@ -201,19 +202,20 @@ class AddToLibrary(bpy.types.Operator):
     bl_label = "Add Selected Object to Library"
 
     # do nothing if none selected
+    @classmethod
     def poll(self, context):
         name = mesh_names()
         for i in name:
             if i == context.object.name:
                 return 0
-        return (context.active_object != None) 
+        return (context.active_object != None)
 
     def execute(self, context):
         obj_data = bpy.context.object.data
         
         # Save selected objects vertices
         verts = []
-        for i in obj_data.verts:
+        for i in obj_data.vertices:
             temp = []
             for j in i.co:
                 temp.append(j)
@@ -223,14 +225,14 @@ class AddToLibrary(bpy.types.Operator):
         faces = []
         for i in obj_data.faces:
             temp = []
-            for j in i.verts:
+            for j in i.vertices:
                 temp.append(j)
             faces.append(temp)
 
         edges = []
         for i in obj_data.edges:
             temp = []
-            for j in i.verts:
+            for j in i.vertices:
                 temp.append(j)
             edges.append(temp)
 
@@ -259,7 +261,7 @@ class library(bpy.types.Operator):
     obj_name = StringProperty(name = "Name of the object", attr="name")
 
     def execute(self, context):
-        # read the parameters of the object from library file 
+        # read the parameters of the object from library file
         verts,faces, edges=read_file(self.properties.obj_name)
         obj = create_mesh_object(context, verts, edges, faces,self.properties.obj_name)
         return {'FINISHED'}
@@ -293,16 +295,9 @@ class library_panel(bpy.types.Panel):
             colR.operator("object.remove_from_library", text="Delete").obj_name=i
 
 def register():
-    bpy.types.register(library_panel)
-    bpy.types.register(AddToLibrary)
-    bpy.types.register(RemoveFromLibrary)
-    bpy.types.register(library)
+    bpy.utils.register_module(__name__)    
 
 def unregister():
-    bpy.types.unregister(library_panel)
-    bpy.types.unregister(AddToLibrary)
-    bpy.types.unregister(RemoveFromLibrary)
-    bpy.types.unregister(library)
-
+    bpy.utils.unregister_module(__name__)
 if __name__ == "__main__":
     register()
