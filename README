@@ -10,4 +10,4 @@ This functionality can be accessed via the "Tool Shelf" in 3D View ([T] key).
 Version history:
 
 v0.1 - Initial revision. Seems to work fine for most purposes.
-
+v0.2 - Updated to work with the API changes. Thanks to ivo <ivo@ivogrigull.com> for the update.
